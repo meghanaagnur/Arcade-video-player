@@ -1,0 +1,2475 @@
+/*
+ * Midnight Arcade — the look of the skin.
+ * Unlayered on purpose: it sits on top of the Scaffold skin's layered rules (src/video/skin.css), which keep
+ * providing behavior for popups, menus, sliders and dialogs.
+ */
+
+/* ------------------------------------------------------------------ tokens */
+
+.media-skin.arcade {
+  --arc-cabinet: #0c0b10;
+  --arc-deck: #1a1824;
+  --arc-lip: #2a2638;
+  --arc-well: #050408;
+  --arc-yellow: #ffd23f;
+  --arc-yellow-dark: #b9840f;
+  --arc-red: #ff4b3e;
+  --arc-blue: #3fa7ff;
+  --arc-purple: #9b6bff;
+  --arc-text: #f5f2ff;
+  --arc-muted: #c9c4e0;
+  --arc-ink: #0c0b10;
+  --arc-ring: #ffd23f;
+
+  /* Surfaces that sit on the picture or float over it stay dark in every theme. */
+  --arc-screen: #0c0b10;
+  --arc-popup: #1a1824;
+  --arc-ink-dark: #0c0b10;
+
+  /* The deck and marquee: what a cabinet theme changes. */
+  --arc-deck-text: var(--arc-text);
+  --arc-deck-muted: var(--arc-muted);
+  --arc-deck-ring: var(--arc-ring);
+  --arc-frame: var(--arc-text);
+  --arc-off: #3a3550;
+  --arc-btn-dark: #34304a;
+  --arc-btn-dark-ink: var(--arc-text);
+  --arc-marquee: var(--arc-yellow);
+  --arc-marquee-edge: var(--arc-yellow-dark);
+  --arc-marquee-ink: var(--arc-ink);
+  --arc-marquee-shadow: var(--arc-red);
+  --arc-bulb-a: #fff7d1;
+  --arc-bulb-b: #e0a91c;
+  --arc-font: "Press Start 2P", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --arc-btn: 48px;
+  --arc-btn-xl: 56px;
+  --arc-press: 4px;
+  --arc-step: steps(2, jump-none);
+
+  /* Video.js tokens the scaffold reads. */
+  --media-font-family: var(--arc-font);
+  --media-accent-color: var(--arc-yellow);
+  --media-accent-text-color: var(--arc-ink);
+  --media-ring: var(--arc-ring);
+  --media-popover: var(--arc-deck);
+  --media-popover-foreground: var(--arc-text);
+  --media-controls-before-start: visible;
+  --media-object-fit: contain;
+}
+
+/* ------------------------------------------------------------------ cabinet layout */
+
+.media-skin.arcade {
+  display: flex !important;
+  flex-direction: column;
+  background: var(--arc-cabinet);
+  color: var(--arc-text);
+  font-family: var(--arc-font);
+  font-size: 10px;
+  line-height: 1.5;
+  border-radius: 6px;
+  box-shadow: 0 0 0 4px var(--arc-lip), 0 12px 0 4px #000;
+  font-variant-numeric: tabular-nums;
+}
+
+.media-skin.arcade:focus-visible {
+  outline: 4px dashed var(--arc-ring);
+  outline-offset: 8px;
+}
+
+.media-skin.arcade:fullscreen {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/*
+ * The video sits in the middle of the cabinet, between marquee and deck. Media elements such as <mux-video> keep
+ * their <video> in a shadow root, so the skin gives the element itself a box and lets the inner video fill it.
+ */
+.media-skin.arcade > :is(video, mux-video, hls-video, hlsjs-video, native-hls-video, dash-video, shaka-video) {
+  display: block !important;
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  height: auto !important;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+/* When the cabinet has a fixed height (fullscreen, or a set aspect ratio), the screen takes what's left. */
+.media-skin.arcade:fullscreen > :is(video, mux-video, hls-video, hlsjs-video, native-hls-video, dash-video, shaka-video),
+.media-skin.arcade[style*="height"] > :is(video, mux-video, hls-video, hlsjs-video, native-hls-video, dash-video, shaka-video) {
+  aspect-ratio: auto;
+  flex-basis: 0;
+}
+
+.media-skin.arcade .arcade-screen-layer {
+  position: absolute !important;
+  inset: auto 0 auto 0 !important;
+  top: var(--arcade-screen-top, 0px) !important;
+  bottom: var(--arcade-screen-bottom, 0px) !important;
+  height: auto !important;
+}
+
+/* ------------------------------------------------------------------ marquee */
+
+.media-skin.arcade .arcade-marquee {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  height: clamp(44px, 9cqi, 72px);
+  background: var(--arc-marquee);
+  border-bottom: 6px solid var(--arc-marquee-edge);
+  overflow: hidden;
+  user-select: none;
+}
+
+.media-skin.arcade .arcade-marquee::before,
+.media-skin.arcade .arcade-marquee::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  height: 8px;
+  background-image: radial-gradient(circle at 6px 4px, var(--arc-bulb-a) 0 2.5px, transparent 3px),
+    radial-gradient(circle at 18px 4px, var(--arc-bulb-b) 0 2.5px, transparent 3px);
+  background-size: 24px 8px;
+  animation: arcade-chase 0.9s var(--arc-step) infinite;
+}
+
+.media-skin.arcade .arcade-marquee::before {
+  top: 3px;
+}
+
+.media-skin.arcade .arcade-marquee::after {
+  bottom: 3px;
+  animation-direction: reverse;
+}
+
+@keyframes arcade-chase {
+  to {
+    background-position-x: 12px;
+  }
+}
+
+.media-skin.arcade .arcade-marquee-title {
+  font-size: clamp(11px, 2.6cqi, 22px);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--arc-marquee-ink);
+  text-shadow: 3px 3px 0 var(--arc-marquee-shadow);
+  white-space: nowrap;
+}
+
+.media-skin.arcade .arcade-marquee-bulbs {
+  display: none;
+}
+
+.media-skin.arcade:fullscreen .arcade-marquee {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ screen glass */
+
+.media-skin.arcade .arcade-glass {
+  z-index: 5;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.16) 0 1px, transparent 1px 3px);
+  box-shadow: inset 0 0 0 3px #000, inset 0 0 70px rgb(0 0 0 / 0.55);
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .media-skin.arcade .arcade-glass {
+    background: none;
+  }
+}
+
+.media-skin.arcade .media-poster {
+  z-index: 4;
+}
+
+/* ------------------------------------------------------------------ control deck */
+
+.media-skin.arcade .arcade-deck-host {
+  position: relative !important;
+  inset: auto !important;
+  flex: none;
+  z-index: 30;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.media-skin.arcade .arcade-deck {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 16px 14px;
+  background: var(--arc-deck);
+  border-top: 6px solid var(--arc-lip);
+  box-shadow: inset 0 2px 0 rgb(255 255 255 / 0.06);
+}
+
+.media-skin.arcade .arcade-stage {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.media-skin.arcade .arcade-stage-label,
+.media-skin.arcade .arcade-readout-label {
+  flex: none;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--arc-deck-muted);
+}
+
+.media-skin.arcade .arcade-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.media-skin.arcade .arcade-cluster {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.media-skin.arcade .arcade-key {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.media-skin.arcade .arcade-key-label {
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--arc-deck-muted);
+  white-space: nowrap;
+}
+
+.media-skin.arcade .arcade-key-label-play > span {
+  display: none;
+}
+
+.media-skin.arcade .arcade-key:has(.media-play-button[data-paused]:not([data-ended])) .arcade-when-paused,
+.media-skin.arcade .arcade-key:has(.media-play-button:not([data-paused]):not([data-ended])) .arcade-when-playing,
+.media-skin.arcade .arcade-key:has(.media-play-button[data-ended]) .arcade-when-ended {
+  display: inline;
+}
+
+/* ------------------------------------------------------------------ arcade buttons */
+
+.media-skin.arcade .media-button.arcade-btn {
+  --btn-face: var(--arc-btn-dark);
+  --btn-ink: var(--arc-btn-dark-ink);
+  width: var(--arc-btn);
+  height: var(--arc-btn);
+  border-radius: 50%;
+  background-color: var(--btn-face);
+  color: var(--btn-ink);
+  box-shadow: inset 0 -5px 0 rgb(0 0 0 / 0.28), inset 0 3px 0 rgb(255 255 255 / 0.35), 0 var(--arc-press) 0 #000;
+  transition-property: transform, box-shadow, filter;
+  transition-duration: 60ms;
+  touch-action: manipulation;
+}
+
+.media-skin.arcade .arcade-btn-red {
+  --btn-face: var(--arc-red);
+  --btn-ink: var(--arc-ink);
+}
+
+.media-skin.arcade .arcade-btn-yellow {
+  --btn-face: var(--arc-yellow);
+  --btn-ink: var(--arc-ink);
+}
+
+.media-skin.arcade .arcade-btn-blue {
+  --btn-face: var(--arc-blue);
+  --btn-ink: var(--arc-ink);
+}
+
+.media-skin.arcade .arcade-btn-purple {
+  --btn-face: var(--arc-purple);
+  --btn-ink: var(--arc-ink);
+}
+
+.media-skin.arcade .arcade-btn-dark {
+  --btn-face: var(--arc-btn-dark);
+  --btn-ink: var(--arc-btn-dark-ink);
+}
+
+.media-skin.arcade .media-button.arcade-btn-xl {
+  width: var(--arc-btn-xl);
+  height: var(--arc-btn-xl);
+}
+
+@media (hover: hover) {
+  .media-skin.arcade .media-button.arcade-btn:hover {
+    background-color: var(--btn-face);
+    filter: brightness(1.12);
+  }
+}
+
+.media-skin.arcade .media-button.arcade-btn:active,
+.media-skin.arcade .media-button.arcade-btn[aria-expanded="true"] {
+  background-color: var(--btn-face);
+  transform: translateY(calc(var(--arc-press) - 1px));
+  box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.28), inset 0 2px 0 rgb(255 255 255 / 0.25), 0 1px 0 #000;
+}
+
+.media-skin.arcade .media-button.arcade-btn:focus-visible {
+  background-color: var(--btn-face);
+  outline: 4px dashed var(--arc-deck-ring);
+  outline-offset: 5px;
+}
+
+.media-skin.arcade .arcade-btn .media-button-icon,
+.media-skin.arcade .arcade-btn .media-button-icon-base {
+  grid-area: 1 / 1;
+  width: 22px;
+  height: 22px;
+}
+
+.media-skin.arcade .arcade-btn-xl .media-button-icon-base {
+  width: 26px;
+  height: 26px;
+}
+
+.media-skin.arcade .media-seek-button-backward-icon {
+  /* The seek-back icon is drawn pointing left; cancel both of the scaffold's mirrors (scale and transform). */
+  scale: none;
+  transform: none;
+}
+
+.media-skin.arcade .media-seek-button-content {
+  display: grid;
+}
+
+/* Mute icon follows the level. */
+.media-skin.arcade .media-mute-button .media-button-icon {
+  display: none;
+}
+
+.media-skin.arcade .media-mute-button[data-muted] .media-mute-button-off-icon,
+.media-skin.arcade .media-mute-button[data-volume-level="off"] .media-mute-button-off-icon,
+.media-skin.arcade .media-mute-button:not([data-muted])[data-volume-level="low"] .media-mute-button-low-icon,
+.media-skin.arcade .media-mute-button:not([data-muted]):is([data-volume-level="medium"], [data-volume-level="high"]) .media-mute-button-high-icon {
+  display: block;
+}
+
+.media-skin.arcade .media-settings-button-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ time slider: the stage bar */
+
+.media-skin.arcade .arcade-time-slider {
+  height: 34px;
+  min-width: 0;
+}
+
+.media-skin.arcade .arcade-time-slider::after {
+  content: "";
+  position: absolute;
+  inset-inline: -3px;
+  top: 50%;
+  height: 22px;
+  translate: 0 -50%;
+  border: 3px solid var(--arc-frame);
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent 0 calc(10% - 2px),
+    rgb(245 242 255 / 0.55) calc(10% - 2px) 10%
+  );
+  background-size: 100% 4px;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  z-index: 1;
+}
+
+.media-skin.arcade .media-time-slider-track {
+  height: 16px;
+}
+
+.media-skin.arcade .media-time-slider-track::before {
+  background-color: var(--arc-well);
+}
+
+.media-skin.arcade .media-time-slider-buffer {
+  background-color: var(--arc-off);
+}
+
+.media-skin.arcade .media-time-slider-fill {
+  background-color: var(--arc-yellow);
+  box-shadow: inset 0 -4px 0 rgb(0 0 0 / 0.25);
+}
+
+.media-skin.arcade .media-time-slider-chapter {
+  --media-chapter-inset-end: 0.75;
+  --media-chapter-inset-start: 0.75;
+}
+
+.media-skin.arcade .media-time-slider-thumb {
+  z-index: 2;
+  width: 12px;
+  height: 30px;
+  background-color: var(--arc-frame);
+  border: 3px solid var(--arc-ink-dark);
+  box-shadow: 0 0 0 2px var(--arc-frame);
+}
+
+.media-skin.arcade .media-time-slider-thumb:focus-visible,
+.media-skin.arcade .media-time-slider:focus-visible,
+.media-skin.arcade .media-volume-slider:focus-visible,
+.media-skin.arcade .media-volume-slider-thumb:focus-visible {
+  outline: 4px dashed var(--arc-deck-ring);
+  outline-offset: 4px;
+}
+
+.media-skin.arcade .media-time-slider-preview {
+  bottom: calc(100% + 14px);
+}
+
+.media-skin.arcade .media-slider-thumbnail {
+  border: 3px solid var(--arc-text);
+  background: #000;
+}
+
+.media-skin.arcade .media-time-slider-preview-meta {
+  background: var(--arc-screen);
+  border: 3px solid var(--arc-text);
+  box-shadow: 4px 4px 0 #000;
+  font-size: 9px;
+  color: var(--arc-yellow);
+  padding: 6px 8px;
+}
+
+.media-skin.arcade .media-time-slider-chapter-title {
+  color: var(--arc-text);
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------------ time readout */
+
+.media-skin.arcade .arcade-readout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-inline: auto;
+}
+
+.media-skin.arcade .arcade-time {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  /* The scaffold gives media-time-group a fixed height; the arcade well sizes itself. */
+  height: auto;
+  min-height: calc(1em + 22px);
+  padding: 12px 12px 10px;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--arc-yellow);
+  background: var(--arc-well);
+  box-shadow: inset 0 0 0 3px var(--arc-lip), inset 0 4px 0 3px #000;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.media-skin.arcade .arcade-time .media-time-separator {
+  color: var(--arc-muted);
+  opacity: 0.8;
+}
+
+.media-skin.arcade .arcade-time :is(.media-time-current-value, .media-time-duration-value, .media-time-separator) {
+  display: inline-block;
+  line-height: 1;
+}
+
+/* ------------------------------------------------------------------ volume: credit lamps */
+
+.media-skin.arcade .arcade-volume {
+  display: flex;
+  align-items: center;
+  height: var(--arc-btn);
+}
+
+.media-skin.arcade .media-poster-image:not([src]),
+.media-skin.arcade .media-poster-image[src=""] {
+  display: none;
+}
+
+/* A control the platform or media can't offer hides itself; take its label with it. */
+.media-skin.arcade .arcade-key:has(> .media-button[data-hidden]),
+.media-skin.arcade .arcade-key:has(> .media-button[hidden]) {
+  display: none;
+}
+
+.media-skin.arcade .arcade-volume-slider {
+  position: relative;
+  width: 92px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.media-skin.arcade .arcade-volume-track {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(50% - 7px);
+  transform: none;
+  translate: none;
+  height: 14px;
+  background: repeating-linear-gradient(to right, var(--arc-off) 0 14px, transparent 14px 19.5px);
+  background-size: 97.5px 100%;
+  border-radius: 0;
+  width: auto;
+}
+
+.media-skin.arcade .arcade-volume-fill {
+  position: absolute;
+  transform: none;
+  translate: none;
+  inset-block: 0;
+  left: 0;
+  right: auto;
+  width: var(--media-slider-fill, 0%);
+  background: repeating-linear-gradient(to right, var(--arc-yellow) 0 14px, transparent 14px 19.5px);
+  background-size: 97.5px 100%;
+  border-radius: 0;
+}
+
+.media-skin.arcade .arcade-volume-fill::before {
+  display: none;
+}
+
+.media-skin.arcade .arcade-volume-thumb {
+  position: absolute;
+  top: calc(50% - 13px);
+  left: calc(var(--media-slider-fill, 0%) - 4px);
+  width: 8px;
+  height: 26px;
+  translate: none;
+  transform: none;
+  background: var(--arc-frame);
+  border: 2px solid var(--arc-ink-dark);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* ------------------------------------------------------------------ tooltips & menus */
+
+.media-skin.arcade .media-tooltip-popup {
+  background: var(--arc-popup);
+  color: var(--arc-text);
+  border: 2px solid var(--arc-text);
+  border-radius: 0;
+  box-shadow: 3px 3px 0 #000;
+  font-size: 8px;
+  padding: 6px 8px;
+  text-transform: uppercase;
+}
+
+.media-skin.arcade .media-tooltip-shortcut {
+  background: var(--arc-yellow);
+  color: var(--arc-ink);
+  border-radius: 0;
+  padding: 2px 4px;
+  font-size: 8px;
+}
+
+.media-skin.arcade .media-menu-popup {
+  background: var(--arc-popup);
+  color: var(--arc-text);
+  border: 3px solid var(--arc-text);
+  border-radius: 0;
+  box-shadow: 6px 6px 0 #000;
+  font-size: 9px;
+  min-width: 220px;
+}
+
+.media-skin.arcade .media-menu-item,
+.media-skin.arcade .media-menu-radio-item {
+  min-height: 40px;
+  padding-inline: 12px;
+  border-radius: 0;
+  gap: 10px;
+  text-transform: uppercase;
+}
+
+.media-skin.arcade .media-menu-item:is(:hover, :focus-visible, [data-highlighted]),
+.media-skin.arcade .media-menu-radio-item:is(:hover, :focus-visible, [data-highlighted]) {
+  background: var(--arc-yellow);
+  color: var(--arc-ink);
+  outline: none;
+}
+
+.media-skin.arcade .media-menu-hint-label,
+.media-skin.arcade .media-menu-badge,
+.media-skin.arcade .media-menu-tier {
+  color: inherit;
+  opacity: 0.8;
+}
+
+.media-skin.arcade .media-menu-trigger-icon,
+.media-skin.arcade .media-menu-forward-chevron,
+.media-skin.arcade .media-menu-back-chevron,
+.media-skin.arcade .media-menu-radio-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.media-skin.arcade .media-menu-back-chevron {
+  scale: -1 1;
+}
+
+.media-skin.arcade .media-menu-separator {
+  height: 3px;
+  background: var(--arc-lip);
+}
+
+/* ------------------------------------------------------------------ indicators, loading, error */
+
+.media-skin.arcade .media-indicator-group {
+  z-index: 25;
+  pointer-events: none;
+}
+
+.media-skin.arcade .media-indicator {
+  background: var(--arc-screen);
+  color: var(--arc-yellow);
+  border: 3px solid var(--arc-text);
+  border-radius: 0;
+  box-shadow: 4px 4px 0 #000;
+  font-size: 10px;
+}
+
+.media-skin.arcade .media-buffering-indicator-controls {
+  z-index: 22;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.media-skin.arcade .arcade-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--arc-screen);
+  border: 3px solid var(--arc-text);
+  box-shadow: 4px 4px 0 #000;
+  color: var(--arc-yellow);
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+.media-skin.arcade .arcade-loading:not([data-visible]) {
+  display: none;
+}
+
+.media-skin.arcade .arcade-loading-icon {
+  width: 18px;
+  height: 18px;
+  animation: arcade-spin 0.8s steps(4) infinite;
+}
+
+@keyframes arcade-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+.media-skin.arcade .media-dialog-popup {
+  background: var(--arc-popup);
+  color: var(--arc-text);
+  border: 3px solid var(--arc-text);
+  box-shadow: 6px 6px 0 #000;
+  border-radius: 0;
+  font-size: 10px;
+}
+
+.media-skin.arcade .media-dialog-title {
+  font-size: 12px;
+  color: var(--arc-red);
+  text-transform: uppercase;
+}
+
+.media-skin.arcade .media-dialog-close {
+  background: var(--arc-yellow);
+  color: var(--arc-ink);
+  border: 0 !important;
+  box-shadow: 0 4px 0 #000;
+  text-transform: uppercase;
+}
+
+.media-skin.arcade .media-dialog-close:focus-visible {
+  outline: 4px dashed var(--arc-ring);
+  outline-offset: 4px;
+}
+
+/* ------------------------------------------------------------------ the game layer (<arcade-machine>) */
+
+.media-skin.arcade .arcade-machine {
+  z-index: 20;
+  display: block;
+  pointer-events: none;
+  overflow: hidden;
+  container: arcade-screen / size;
+}
+
+.media-skin.arcade .am-hud {
+  position: absolute;
+  inset: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgb(12 11 16 / 0.85);
+  color: var(--arc-text);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  transition: opacity 200ms;
+}
+
+.media-skin.arcade .am-hud b {
+  font-weight: 400;
+  margin-inline-end: 6px;
+}
+
+.media-skin.arcade .am-1up {
+  color: var(--arc-red);
+  animation: arcade-blink 1s var(--arc-step) infinite;
+}
+
+.media-skin.arcade .am-hi {
+  color: var(--arc-yellow);
+}
+
+.media-skin.arcade .arcade-machine:is([data-phase="attract"], [data-phase="clear"]) .am-hud,
+.media-skin.arcade:not([data-controls-visible]) .arcade-machine[data-phase="playing"] .am-hud {
+  opacity: 0;
+}
+
+@keyframes arcade-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.media-skin.arcade .am-blink {
+  animation: arcade-blink 1s var(--arc-step) infinite;
+}
+
+/* Panels */
+
+.media-skin.arcade .am-panel {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 16px;
+  text-align: center;
+  background: rgb(12 11 16 / 0.9);
+  pointer-events: auto;
+  overflow: auto;
+  text-transform: uppercase;
+}
+
+.media-skin.arcade .arcade-machine[data-phase="attract"] .am-attract,
+.media-skin.arcade .arcade-machine[data-phase="clear"] .am-clear {
+  display: flex;
+}
+
+.media-skin.arcade .am-kicker {
+  font-size: 9px;
+  color: var(--arc-muted);
+  letter-spacing: 0.2em;
+}
+
+.media-skin.arcade .am-insert {
+  font-size: clamp(14px, 4.4cqi, 28px);
+  color: var(--arc-yellow);
+  text-shadow: 3px 3px 0 var(--arc-red);
+}
+
+.media-skin.arcade .am-btn {
+  font: inherit;
+  font-size: 12px;
+  text-transform: uppercase;
+  min-height: 48px;
+  padding: 0 22px;
+  background: var(--arc-red);
+  color: var(--arc-ink);
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  box-shadow: inset 0 -5px 0 rgb(0 0 0 / 0.25), 0 5px 0 #000;
+  transition: transform 60ms, box-shadow 60ms;
+}
+
+.media-skin.arcade .am-btn:active {
+  transform: translateY(4px);
+  box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.25), 0 1px 0 #000;
+}
+
+.media-skin.arcade .am-btn:focus-visible,
+.media-skin.arcade .am-letter-input:focus-visible,
+.media-skin.arcade .am-title:focus-visible {
+  outline: 4px dashed var(--arc-ring);
+  outline-offset: 5px;
+}
+
+@media (hover: hover) {
+  .media-skin.arcade .am-btn:hover {
+    filter: brightness(1.12);
+  }
+}
+
+.media-skin.arcade .am-btn-enter,
+.media-skin.arcade .am-btn-again {
+  background: var(--arc-yellow);
+}
+
+/* Coin-op: a real coin to drag (or tap) into the slot. */
+
+.media-skin.arcade .am-coin-op {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 6px 0;
+}
+
+.media-skin.arcade .am-coin {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  font: inherit;
+  cursor: grab;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  background: none;
+  filter: drop-shadow(0 4px 0 #000);
+  animation: arcade-coin-bob 1.2s var(--arc-step) infinite;
+}
+
+.media-skin.arcade .am-coin-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .media-skin.arcade .am-coin:hover {
+    filter: brightness(1.1);
+  }
+}
+
+.media-skin.arcade .am-coin:focus-visible {
+  outline: 4px dashed var(--arc-ring);
+  outline-offset: 6px;
+}
+
+.media-skin.arcade .arcade-machine[data-dragging] .am-coin {
+  cursor: grabbing;
+  animation: none;
+  filter: drop-shadow(0 10px 0 rgb(0 0 0 / 0.55));
+}
+
+@keyframes arcade-coin-bob {
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.media-skin.arcade .am-coin-arrow {
+  width: 0;
+  height: 0;
+  border-block: 10px solid transparent;
+  border-inline-start: 14px solid var(--arc-red);
+  animation: arcade-blink 1s var(--arc-step) infinite;
+}
+
+.media-skin.arcade .am-slot {
+  display: grid;
+  place-items: center;
+}
+
+.media-skin.arcade .am-slot-plate {
+  width: 50px;
+  height: 66px;
+  display: grid;
+  place-items: center;
+  background: #2a2638;
+  box-shadow: inset 0 0 0 3px #4a4466, 0 4px 0 #000;
+  transition: box-shadow 120ms;
+}
+
+.media-skin.arcade .am-slot-mouth {
+  width: 8px;
+  height: 36px;
+  background: #000;
+  box-shadow: 0 0 0 3px var(--arc-red);
+  transition: box-shadow 120ms;
+}
+
+.media-skin.arcade .arcade-machine[data-coin-near] .am-slot-plate {
+  box-shadow: inset 0 0 0 3px var(--arc-yellow), 0 4px 0 #000, 0 0 0 4px rgb(255 210 63 / 0.35);
+}
+
+.media-skin.arcade .arcade-machine[data-coin-near] .am-slot-mouth {
+  box-shadow: 0 0 0 3px var(--arc-yellow);
+}
+
+.media-skin.arcade .am-coin-hint {
+  margin: 0;
+  font-size: 9px;
+  line-height: 1.8;
+  color: var(--arc-muted);
+}
+
+.media-skin.arcade .am-hint-touch {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .media-skin.arcade .am-hint-fine {
+    display: none;
+  }
+  .media-skin.arcade .am-hint-touch {
+    display: inline;
+  }
+}
+
+/* Insert: fly to the slot, turn edge-on, drop in. */
+.media-skin.arcade .arcade-machine[data-coin] .am-coin {
+  animation: arcade-coin-in 440ms cubic-bezier(0.5, 0, 0.9, 0.5) forwards;
+  pointer-events: none;
+}
+
+@keyframes arcade-coin-in {
+  0% {
+    translate: var(--from-x, 0px) var(--from-y, 0px);
+    scale: 1 1;
+    opacity: 1;
+  }
+  65% {
+    translate: var(--to-x, 0px) var(--to-y, 0px);
+    scale: 0.9 0.9;
+    opacity: 1;
+  }
+  100% {
+    translate: var(--to-x, 0px) var(--to-y, 0px);
+    scale: 0.12 0.85;
+    opacity: 0;
+  }
+}
+
+.media-skin.arcade .arcade-machine[data-coin] .am-slot-mouth {
+  box-shadow: 0 0 0 3px var(--arc-yellow);
+}
+
+/* Keep the coin-op on screen while the coin goes in, even though playback has already started. */
+.media-skin.arcade .arcade-machine[data-coin] .am-attract {
+  display: flex;
+  animation: arcade-fade-out 260ms 420ms forwards;
+}
+
+@keyframes arcade-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* CRT power-on: a bright line flashes across the middle, then the picture opens up from it. */
+.media-skin.arcade .am-crt {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: none;
+}
+
+.media-skin.arcade .arcade-machine[data-crt="on"] .am-crt {
+  display: block;
+}
+
+.media-skin.arcade .am-crt::before,
+.media-skin.arcade .am-crt::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  height: 50%;
+  background: #000;
+  animation: arcade-crt-open 560ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.media-skin.arcade .am-crt::before {
+  top: 0;
+  transform-origin: top;
+}
+
+.media-skin.arcade .am-crt::after {
+  bottom: 0;
+  transform-origin: bottom;
+}
+
+.media-skin.arcade .am-crt-line {
+  position: absolute;
+  z-index: 1;
+  inset-inline: 0;
+  top: calc(50% - 2px);
+  height: 4px;
+  background: #f5f2ff;
+  box-shadow: 0 0 12px 2px rgb(245 242 255 / 0.8);
+  animation: arcade-crt-line 560ms ease-out forwards;
+}
+
+@keyframes arcade-crt-open {
+  0%,
+  30% {
+    transform: scaleY(1);
+  }
+  100% {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes arcade-crt-line {
+  0% {
+    opacity: 1;
+    clip-path: inset(0 50%);
+  }
+  30% {
+    opacity: 1;
+    clip-path: inset(0 0);
+  }
+  100% {
+    opacity: 0;
+    clip-path: inset(0 0);
+  }
+}
+
+/* Coin effects: points earned pop coins up from the bottom of the screen. */
+.media-skin.arcade .am-fx {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.media-skin.arcade .am-fx-coin {
+  position: absolute;
+  bottom: -48px;
+  width: var(--size, 40px);
+  height: var(--size, 40px);
+  opacity: 0;
+  filter: drop-shadow(0 3px 0 #000);
+  animation: arcade-coin-pop 1300ms cubic-bezier(0.2, 0.7, 0.4, 1) forwards;
+}
+
+.media-skin.arcade .am-fx-coin .am-coin-art {
+  animation: arcade-coin-spin 640ms steps(4) infinite;
+}
+
+@keyframes arcade-coin-pop {
+  0% {
+    opacity: 1;
+    translate: 0 0;
+  }
+  45% {
+    opacity: 1;
+    translate: calc(var(--drift) * 0.55) var(--rise);
+  }
+  100% {
+    opacity: 0;
+    translate: var(--drift) calc(var(--rise) * 0.35);
+  }
+}
+
+@keyframes arcade-coin-spin {
+  0%,
+  100% {
+    scale: 1 1;
+  }
+  25% {
+    scale: 0.7 1;
+  }
+  50% {
+    scale: 0.35 1;
+  }
+  75% {
+    scale: 0.7 1;
+  }
+}
+
+.media-skin.arcade .am-fx-points {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  padding: 8px 10px;
+  font-size: 16px;
+  color: var(--arc-yellow);
+  background: rgb(12 11 16 / 0.85);
+  box-shadow: 3px 3px 0 #000;
+  text-shadow: 2px 2px 0 var(--arc-red);
+  animation: arcade-points 1300ms ease-out forwards;
+}
+
+@keyframes arcade-points {
+  0% {
+    opacity: 0;
+    translate: 0 8px;
+  }
+  15%,
+  70% {
+    opacity: 1;
+    translate: 0 -10px;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 -24px;
+  }
+}
+
+/* Pause card */
+
+.media-skin.arcade .am-pause {
+  position: absolute;
+  inset: 0;
+  display: none;
+  place-items: center;
+  pointer-events: none;
+}
+
+.media-skin.arcade .arcade-machine[data-phase="paused"] .am-pause {
+  display: grid;
+}
+
+.media-skin.arcade .am-pause-card {
+  padding: 12px 18px;
+  font-size: clamp(12px, 3cqi, 20px);
+  text-transform: uppercase;
+  color: var(--arc-yellow);
+  background: var(--arc-screen);
+  border: 3px solid var(--arc-text);
+  box-shadow: 5px 5px 0 #000;
+  letter-spacing: 0.1em;
+}
+
+/* High score tables */
+
+.media-skin.arcade .am-table-wrap {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+}
+
+.media-skin.arcade .am-table-title {
+  font-size: 9px;
+  color: var(--arc-muted);
+  letter-spacing: 0.15em;
+}
+
+.media-skin.arcade .am-table {
+  list-style: none;
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  font-size: 10px;
+}
+
+.media-skin.arcade .am-row {
+  display: grid;
+  grid-template-columns: 4ch 4ch 7ch;
+  gap: 2ch;
+  text-align: start;
+  color: var(--arc-text);
+}
+
+.media-skin.arcade .am-row:nth-child(1) {
+  color: var(--arc-yellow);
+}
+
+.media-skin.arcade .am-score {
+  text-align: end;
+}
+
+.media-skin.arcade .am-row-new {
+  color: var(--arc-ink-dark);
+  background: var(--arc-yellow);
+  outline: 4px solid var(--arc-yellow);
+  animation: arcade-blink 0.6s var(--arc-step) 6;
+}
+
+/* Stage clear */
+
+.media-skin.arcade .am-title {
+  font-size: clamp(14px, 4.4cqi, 28px);
+  font-weight: 400;
+  color: var(--arc-yellow);
+  text-shadow: 3px 3px 0 var(--arc-red);
+  margin: 0;
+}
+
+.media-skin.arcade .am-tally {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  font-size: 10px;
+  min-width: min(340px, 90%);
+}
+
+.media-skin.arcade .am-tally-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.media-skin.arcade .am-tally dd {
+  margin: 0;
+  color: var(--arc-yellow);
+}
+
+.media-skin.arcade .am-tally-total {
+  padding-top: 8px;
+  border-top: 3px dashed var(--arc-lip);
+  font-size: 12px;
+}
+
+.media-skin.arcade .am-initials {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+}
+
+.media-skin.arcade .am-results {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+}
+
+.media-skin.arcade .am-initials[hidden],
+.media-skin.arcade .am-results[hidden] {
+  display: none;
+}
+
+.media-skin.arcade .am-new-high {
+  font-size: 12px;
+  color: var(--arc-red);
+}
+
+.media-skin.arcade .am-initials-help {
+  font-size: 9px;
+  line-height: 1.8;
+  color: var(--arc-muted);
+  max-width: 40ch;
+}
+
+.media-skin.arcade .am-letters {
+  display: flex;
+  gap: 14px;
+}
+
+.media-skin.arcade .am-letter {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+
+.media-skin.arcade .am-nudge {
+  font: inherit;
+  font-size: 10px;
+  width: 44px;
+  height: 28px;
+  color: var(--arc-text);
+  background: var(--arc-lip);
+  border: 0;
+  cursor: pointer;
+}
+
+.media-skin.arcade .am-letter-input {
+  width: 44px;
+  height: 52px;
+  font: inherit;
+  font-size: 22px;
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--arc-yellow);
+  background: var(--arc-well);
+  border: 3px solid var(--arc-text);
+  border-radius: 0;
+  caret-color: transparent;
+}
+
+.media-skin.arcade .am-continue {
+  font-size: 12px;
+  color: var(--arc-text);
+}
+
+.media-skin.arcade .am-continue-hint {
+  margin: 0;
+  font-size: 8px;
+  line-height: 1.8;
+  color: var(--arc-muted);
+}
+
+.media-skin.arcade .arcade-machine[data-game-over] .am-btn-again,
+.media-skin.arcade .arcade-machine[data-game-over] .am-continue-hint {
+  visibility: hidden;
+}
+
+.media-skin.arcade .am-tally-row[hidden] {
+  display: none;
+}
+
+.media-skin.arcade .am-count {
+  color: var(--arc-red);
+}
+
+.media-skin.arcade .arcade-machine[data-game-over] .am-continue {
+  color: var(--arc-red);
+}
+
+.media-skin.arcade .am-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Smaller screens inside the cabinet: keep the essentials. */
+@container arcade-screen (height < 300px) {
+  .media-skin.arcade .am-attract .am-table-wrap,
+  .media-skin.arcade .am-kicker {
+    display: none;
+  }
+  .media-skin.arcade .am-panel {
+    gap: 10px;
+    padding: 10px;
+  }
+  .media-skin.arcade .am-clear .am-table-wrap {
+    display: none;
+  }
+}
+
+@container arcade-screen (height < 200px) {
+  .media-skin.arcade .am-panel {
+    gap: 6px;
+    padding: 6px;
+  }
+  .media-skin.arcade .am-insert {
+    font-size: 12px;
+  }
+  .media-skin.arcade .am-coin-op {
+    gap: 14px;
+    padding: 0;
+  }
+  .media-skin.arcade .am-coin {
+    width: 48px;
+    height: 48px;
+  }
+  .media-skin.arcade .am-slot-plate {
+    width: 42px;
+    height: 56px;
+  }
+  .media-skin.arcade .am-coin-hint,
+  .media-skin.arcade .am-tally-row:not(.am-tally-total),
+  .media-skin.arcade .am-initials-help,
+  .media-skin.arcade .am-nudge {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ responsive deck */
+
+@container media-root (width < 640px) {
+  .media-skin.arcade .arcade-hide-small,
+  .media-skin.arcade .arcade-key-label,
+  .media-skin.arcade .arcade-readout-label,
+  .media-skin.arcade .arcade-stage-label {
+    display: none !important;
+  }
+  .media-skin.arcade {
+    --arc-btn-xl: 52px;
+  }
+  .media-skin.arcade .arcade-deck {
+    padding: 10px 12px 14px;
+    gap: 8px;
+  }
+  .media-skin.arcade .arcade-row,
+  .media-skin.arcade .arcade-cluster {
+    align-items: center;
+    gap: 8px;
+  }
+  .media-skin.arcade .arcade-readout {
+    margin-inline: 0;
+  }
+  .media-skin.arcade .arcade-time {
+    font-size: 10px;
+    padding: 11px 8px 9px;
+  }
+  .media-skin.arcade .am-hud {
+    font-size: 8px;
+    padding: 8px 10px;
+  }
+}
+
+@container media-root (width < 400px) {
+  .media-skin.arcade .arcade-hide-tiny {
+    display: none !important;
+  }
+  .media-skin.arcade .arcade-time {
+    font-size: 8px;
+    padding: 11px 6px 9px;
+    gap: 4px;
+  }
+  .media-skin.arcade .arcade-row,
+  .media-skin.arcade .arcade-cluster {
+    gap: 6px;
+  }
+}
+
+/* ------------------------------------------------------------------ reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .media-skin.arcade .arcade-marquee::before,
+  .media-skin.arcade .arcade-marquee::after,
+  .media-skin.arcade .am-1up,
+  .media-skin.arcade .am-blink,
+  .media-skin.arcade .am-row-new,
+  .media-skin.arcade .arcade-loading-icon {
+    animation: none;
+  }
+  .media-skin.arcade .media-button.arcade-btn,
+  .media-skin.arcade .am-btn,
+  .media-skin.arcade .am-hud {
+    transition: none;
+  }
+  .media-skin.arcade .am-coin,
+  .media-skin.arcade .am-coin-arrow,
+  .media-skin.arcade .arcade-machine[data-coin] .am-coin,
+  .media-skin.arcade .arcade-machine[data-crt="on"] .am-crt,
+  .media-skin.arcade .am-crt::before,
+  .media-skin.arcade .am-crt::after,
+  .media-skin.arcade .am-crt-line,
+  .media-skin.arcade .arcade-machine[data-coin] .am-attract {
+    animation: none;
+  }
+  .media-skin.arcade .am-fx-points {
+    animation: arcade-points-calm 1300ms steps(1, end) forwards;
+  }
+}
+
+@media (forced-colors: active) {
+  .media-skin.arcade .media-button.arcade-btn {
+    border: 2px solid ButtonText;
+  }
+}
+
+@keyframes arcade-points-calm {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.media-skin.arcade .am-letter-input::selection {
+  color: var(--arc-ink);
+  background: var(--arc-yellow);
+}
+
+/* ------------------------------------------------------------------ combo */
+
+.media-skin.arcade .am-combo {
+  display: inline-block;
+  margin-inline-start: 8px;
+  padding: 2px 5px;
+  color: var(--arc-ink-dark);
+  background: var(--arc-muted);
+}
+
+.media-skin.arcade .am-combo[data-level="1"] {
+  color: var(--arc-muted);
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--arc-muted);
+}
+
+.media-skin.arcade .am-combo[data-level="2"] {
+  background: var(--arc-blue);
+}
+
+.media-skin.arcade .am-combo[data-level="3"] {
+  background: var(--arc-purple);
+}
+
+.media-skin.arcade .am-combo[data-level="4"] {
+  background: var(--arc-red);
+}
+
+.media-skin.arcade .am-fx-combo {
+  position: absolute;
+  left: 50%;
+  top: 22%;
+  translate: -50% 0;
+  padding: 8px 12px;
+  font-size: clamp(12px, 3.2cqi, 22px);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--arc-yellow);
+  background: rgb(12 11 16 / 0.88);
+  box-shadow: 4px 4px 0 #000;
+  text-shadow: 2px 2px 0 var(--arc-red);
+  animation: arcade-combo-pop 1300ms steps(6, end) forwards;
+}
+
+.media-skin.arcade .am-fx-combo-break {
+  font-size: clamp(10px, 2cqi, 14px);
+  color: var(--arc-muted);
+  text-shadow: none;
+}
+
+@keyframes arcade-combo-pop {
+  0% {
+    opacity: 0;
+    scale: 0.6;
+  }
+  15%,
+  75% {
+    opacity: 1;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .media-skin.arcade .am-fx-combo {
+    animation: arcade-points-calm 1300ms steps(1, end) forwards;
+  }
+}
+
+/* ------------------------------------------------------------------ Sound FX switch */
+
+.media-skin.arcade .arcade-sfx-item[data-sfx="off"] .arcade-sfx-state {
+  opacity: 1;
+  color: var(--arc-red);
+}
+
+.media-skin.arcade .arcade-sfx-item:is(:hover, :focus-visible, [data-highlighted])[data-sfx="off"] .arcade-sfx-state {
+  color: inherit;
+}
+
+/* ------------------------------------------------------------------ captions sit just above the deck */
+
+.media-skin.arcade {
+  --media-caption-track-y: 0px;
+  --media-caption-controls-y: 0px;
+}
+
+/* ------------------------------------------------------------------ "Out of order" error screen */
+
+.media-skin.arcade .media-dialog-popup.arcade-out-of-order {
+  justify-items: center;
+  text-align: center;
+  gap: 14px;
+  padding: 26px 22px 22px;
+  background: var(--arc-screen);
+  border: 0;
+  box-shadow:
+    0 0 0 8px transparent,
+    6px 6px 0 #000;
+  outline: 8px solid transparent;
+  background-image:
+    linear-gradient(var(--arc-screen), var(--arc-screen)),
+    repeating-linear-gradient(-45deg, var(--arc-yellow) 0 12px, #0c0b10 12px 24px);
+  background-clip: padding-box, border-box;
+  background-origin: padding-box, border-box;
+  border: 10px solid transparent !important;
+  max-width: min(420px, calc(100% - 24px));
+}
+
+.media-skin.arcade .arcade-out-of-order .media-dialog-title,
+.media-skin.arcade .arcade-out-of-order .media-dialog-description {
+  overflow-wrap: anywhere;
+}
+
+.media-skin.arcade .arcade-ooo-sign {
+  margin: -6px 0 0;
+  padding: 8px 14px;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #0c0b10;
+  background: var(--arc-yellow);
+  rotate: -2deg;
+  box-shadow: 3px 3px 0 #000;
+}
+
+.media-skin.arcade .media-dialog-description {
+  font-size: 9px;
+  line-height: 1.8;
+  color: var(--arc-muted);
+  max-width: 34ch;
+}
+
+.media-skin.arcade .arcade-ooo-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.media-skin.arcade .arcade-retry,
+.media-skin.arcade .media-dialog-close {
+  width: auto;
+  min-width: 96px;
+  height: 44px;
+  padding-inline: 16px;
+  font-size: 10px;
+  text-transform: uppercase;
+  border-radius: 0;
+  border: 0 !important;
+  box-shadow: 0 4px 0 #000;
+  cursor: pointer;
+}
+
+.media-skin.arcade .arcade-retry {
+  background: var(--arc-yellow);
+  color: #0c0b10;
+}
+
+.media-skin.arcade .media-dialog-close {
+  background: #34304a;
+  color: var(--arc-text);
+  justify-self: auto;
+}
+
+.media-skin.arcade .arcade-retry:focus-visible,
+.media-skin.arcade .media-dialog-close:focus-visible {
+  outline: 4px dashed var(--arc-ring);
+  outline-offset: 4px;
+}
+
+/* ------------------------------------------------------------------ cabinet themes
+ * Set data-arcade-theme on the media container: "midnight" (default), "sunset" or "beige".
+ * Only the cabinet changes; the screen, menus and overlays stay dark so they read over any video.
+ */
+
+.media-skin.arcade[data-arcade-theme="sunset"] {
+  --arc-cabinet: #1c0f17;
+  --arc-deck: #2b1622;
+  --arc-lip: #4a2236;
+  --arc-well: #0f070b;
+  --arc-yellow: #ffb547;
+  --arc-yellow-dark: #b5621d;
+  --arc-red: #ff5c7a;
+  --arc-blue: #5ec8ff;
+  --arc-purple: #c58bff;
+  --arc-ring: #ffb547;
+  --arc-text: #fff1e8;
+  --arc-muted: #ecc9cf;
+  --arc-off: #5a2a40;
+  --arc-btn-dark: #4a2236;
+  --arc-marquee: #ff8f4a;
+  --arc-marquee-edge: #b5521d;
+  --arc-marquee-ink: #1c0f17;
+  --arc-marquee-shadow: #c2245d;
+  --arc-bulb-a: #fff0d9;
+  --arc-bulb-b: #c9541c;
+  --arc-popup: #24121c;
+}
+
+.media-skin.arcade[data-arcade-theme="beige"] {
+  --arc-cabinet: #e8dcc0;
+  --arc-deck: #d6c8a6;
+  --arc-lip: #b4a37b;
+  --arc-well: #1c1812;
+  --arc-yellow: #f2c230;
+  --arc-yellow-dark: #9a7414;
+  --arc-red: #d9412e;
+  --arc-blue: #2f7dd1;
+  --arc-purple: #8a6ad6;
+  --arc-deck-text: #2b241a;
+  --arc-deck-muted: #4a4030;
+  --arc-deck-ring: #1c1812;
+  --arc-frame: #2b241a;
+  --arc-off: #4a4030;
+  --arc-btn-dark: #4a4030;
+  --arc-btn-dark-ink: #f4ecd8;
+  --arc-marquee: #c8372d;
+  --arc-marquee-edge: #8a221b;
+  --arc-marquee-ink: #fff3dc;
+  --arc-marquee-shadow: #1c1812;
+  --arc-bulb-a: #fff3dc;
+  --arc-bulb-b: #f2a497;
+}
+
+/* The narrowest phones: four buttons and a full "0:00 / 0:00" don't fit, so show the current time only. */
+@container media-root (width < 340px) {
+  .media-skin.arcade .arcade-time .media-time-separator,
+  .media-skin.arcade .arcade-time .media-time-duration-value {
+    display: none;
+  }
+  .media-skin.arcade .arcade-time {
+    padding: 11px 7px 9px;
+  }
+}
+
+/* Scaffold hides the time below 20rem; the arcade readout always shows at least the current time. */
+.media-skin.arcade .arcade-time .media-time-current-value {
+  display: inline;
+}
+
+/* iOS Safari: no grey tap flash on arcade controls. */
+.media-skin.arcade :is(.arcade-btn, .am-btn, .am-nudge, .arcade-retry, .media-dialog-close) {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ------------------------------------------------------------------ game over: the prize ticket */
+
+.media-skin.arcade .am-ticket-stage[hidden],
+.media-skin.arcade .am-after-tear[hidden],
+.media-skin.arcade .am-tear-actions[hidden],
+.media-skin.arcade .am-bank-line[hidden] {
+  display: none;
+}
+
+/* On the ticket screen the scorecard steps aside: the ticket is the only thing on screen. */
+.media-skin.arcade .arcade-machine[data-step="ticket"] .am-clear > :not(.am-ticket-stage) {
+  display: none;
+}
+
+.media-skin.arcade .am-ticket-stage {
+  --ticket-w: 248px;
+  --ticket-paper: #ffe6b8;
+  --ticket-ink: #a3241a;
+  --ticket-ink-soft: #7a3a22;
+  --ticket-shade: #f2c98a;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  background: rgb(12 11 16 / 0.92);
+}
+
+/* The printer: a plate across the top edge of the screen with a slot the ticket feeds from. */
+.media-skin.arcade .am-printer {
+  position: relative;
+  z-index: 3;
+  flex: none;
+  width: calc(var(--ticket-w) + 64px);
+  height: 26px;
+  background: #2a2638;
+  box-shadow: inset 0 -3px 0 #4a4466, 0 4px 0 #000;
+}
+
+.media-skin.arcade .am-printer::before,
+.media-skin.arcade .am-printer::after {
+  content: "";
+  position: absolute;
+  top: 9px;
+  width: 6px;
+  height: 6px;
+  background: var(--arc-red);
+  box-shadow: 0 0 0 2px #000;
+}
+
+.media-skin.arcade .am-printer::before {
+  left: 10px;
+}
+
+.media-skin.arcade .am-printer::after {
+  right: 10px;
+  background: var(--arc-yellow);
+}
+
+.media-skin.arcade .am-printer-mouth {
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: calc(var(--ticket-w) + 14px);
+  height: 6px;
+  translate: -50% 0;
+  background: #000;
+}
+
+/* Only the top edge clips, so the ticket seems to come out of the slot. */
+.media-skin.arcade .am-ticket-window {
+  position: relative;
+  z-index: 2;
+  margin-top: -14px;
+  padding-top: 0;
+  clip-path: inset(0 -200vw -200vh -200vw);
+}
+
+.media-skin.arcade .am-ticket-window:has(.am-ticket[data-torn]) {
+  clip-path: none;
+}
+
+.media-skin.arcade .am-ticket {
+  position: relative;
+  width: var(--ticket-w);
+  margin: 0;
+  display: grid;
+  translate: 0 -105%;
+  filter: drop-shadow(4px 4px 0 rgb(0 0 0 / 0.6));
+}
+
+.media-skin.arcade .am-ticket[data-feeding] {
+  animation: arcade-ticket-feed 1200ms steps(10, end) 150ms forwards;
+}
+
+.media-skin.arcade .am-ticket[data-printed] {
+  translate: 0 0;
+}
+
+@keyframes arcade-ticket-feed {
+  from {
+    translate: 0 -105%;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+/* Pixel edges: square notches down both sides. */
+.media-skin.arcade :is(.am-ticket-stub, .am-ticket-body) {
+  background: var(--ticket-paper);
+  -webkit-mask:
+    linear-gradient(#000 0 0) center / calc(100% - 8px) 100% no-repeat,
+    repeating-linear-gradient(to bottom, #000 0 8px, transparent 8px 12px) left top / 4px 100% no-repeat,
+    repeating-linear-gradient(to bottom, #000 0 8px, transparent 8px 12px) right top / 4px 100% no-repeat;
+  mask:
+    linear-gradient(#000 0 0) center / calc(100% - 8px) 100% no-repeat,
+    repeating-linear-gradient(to bottom, #000 0 8px, transparent 8px 12px) left top / 4px 100% no-repeat,
+    repeating-linear-gradient(to bottom, #000 0 8px, transparent 8px 12px) right top / 4px 100% no-repeat;
+}
+
+/* The stub stays in the printer when the ticket is torn off. */
+.media-skin.arcade .am-ticket-stub {
+  position: relative;
+  height: 30px;
+  background:
+    repeating-linear-gradient(to right, var(--ticket-shade) 0 4px, transparent 4px 8px) left 8px top 10px / calc(100% - 16px) 4px no-repeat,
+    var(--ticket-paper);
+}
+
+/* Ragged edge left behind on the stub after the tear. */
+.media-skin.arcade .am-ticket[data-torn] .am-ticket-stub {
+  /* Stepped pixel teeth: in every 12px, a full 8px tooth, a 4px half-step, then a gap. */
+  -webkit-mask:
+    linear-gradient(#000 0 0) center top / calc(100% - 8px) calc(100% - 8px) no-repeat,
+    repeating-linear-gradient(to right, #000 0 8px, transparent 8px 12px) 4px calc(100% - 4px) / calc(100% - 8px) 4px no-repeat,
+    repeating-linear-gradient(to right, #000 0 4px, transparent 4px 12px) 4px bottom / calc(100% - 8px) 4px no-repeat;
+  mask:
+    linear-gradient(#000 0 0) center top / calc(100% - 8px) calc(100% - 8px) no-repeat,
+    repeating-linear-gradient(to right, #000 0 8px, transparent 8px 12px) 4px calc(100% - 4px) / calc(100% - 8px) 4px no-repeat,
+    repeating-linear-gradient(to right, #000 0 4px, transparent 4px 12px) 4px bottom / calc(100% - 8px) 4px no-repeat;
+}
+
+/* A shaded line along the torn edge so the break reads clearly. */
+.media-skin.arcade .am-ticket[data-torn] .am-ticket-stub::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 0;
+  height: 8px;
+  background:
+    repeating-linear-gradient(to right, var(--ticket-shade) 0 8px, transparent 8px 12px) 0 0 / 100% 4px no-repeat,
+    repeating-linear-gradient(to right, var(--ticket-shade) 0 4px, transparent 4px 12px) 0 4px / 100% 4px no-repeat;
+}
+
+/* The ticket's own top edge gets the matching cut. */
+.media-skin.arcade .am-ticket[data-torn] .am-ticket-body {
+  -webkit-mask:
+    linear-gradient(#000 0 0) center bottom / calc(100% - 8px) calc(100% - 8px) no-repeat,
+    repeating-linear-gradient(to right, transparent 0 4px, #000 4px 12px) 4px 0 / calc(100% - 8px) 4px no-repeat,
+    repeating-linear-gradient(to right, transparent 0 8px, #000 8px 12px) 4px 4px / calc(100% - 8px) 4px no-repeat,
+    repeating-linear-gradient(to bottom, #000 0 8px, transparent 8px 12px) left 8px / 4px calc(100% - 8px) no-repeat,
+    repeating-linear-gradient(to bottom, #000 0 8px, transparent 8px 12px) right 8px / 4px calc(100% - 8px) no-repeat;
+  mask:
+    linear-gradient(#000 0 0) center bottom / calc(100% - 8px) calc(100% - 8px) no-repeat,
+    repeating-linear-gradient(to right, transparent 0 4px, #000 4px 12px) 4px 0 / calc(100% - 8px) 4px no-repeat,
+    repeating-linear-gradient(to right, transparent 0 8px, #000 8px 12px) 4px 4px / calc(100% - 8px) 4px no-repeat,
+    repeating-linear-gradient(to bottom, #000 0 8px, transparent 8px 12px) left 8px / 4px calc(100% - 8px) no-repeat,
+    repeating-linear-gradient(to bottom, #000 0 8px, transparent 8px 12px) right 8px / 4px calc(100% - 8px) no-repeat;
+}
+
+.media-skin.arcade .am-ticket-body {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  padding: 20px 24px 16px;
+  text-align: center;
+  color: var(--ticket-ink);
+  cursor: grab;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Perforation: the dotted tear line between stub and ticket. It darkens as you pull. */
+.media-skin.arcade .am-ticket-body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 6px;
+  right: 6px;
+  height: 2px;
+  background: repeating-linear-gradient(to right, var(--ticket-ink) 0 4px, transparent 4px 8px);
+  opacity: calc(0.45 + var(--strain, 0) * 0.55);
+}
+
+/* Inner pixel border. */
+.media-skin.arcade .am-ticket-body::after {
+  content: "";
+  position: absolute;
+  inset: 8px 10px;
+  border: 2px dashed var(--ticket-ink);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.media-skin.arcade .arcade-machine[data-pulling] .am-ticket-body {
+  cursor: grabbing;
+}
+
+.media-skin.arcade .am-ticket-body:focus-visible {
+  outline: 4px dashed var(--arc-ring);
+  outline-offset: 4px;
+}
+
+.media-skin.arcade .am-ticket[data-torn] .am-ticket-body::before {
+  display: none;
+}
+
+.media-skin.arcade .am-ticket-body[data-flying] {
+  animation: arcade-ticket-fly 880ms cubic-bezier(0.45, 0, 0.25, 1) forwards;
+}
+
+.media-skin.arcade .am-ticket-body[data-gone] {
+  visibility: hidden;
+}
+
+.media-skin.arcade .am-ticket[data-torn] .am-ticket-body {
+  pointer-events: none;
+}
+
+@keyframes arcade-ticket-fly {
+  0% {
+    translate: var(--from-x, 0px) var(--from-y, 0px);
+    rotate: 0deg;
+    scale: 1;
+  }
+  22% {
+    translate: calc(var(--from-x, 0px) - 6px) calc(var(--from-y, 0px) + 34px);
+    rotate: -9deg;
+    scale: 1;
+  }
+  100% {
+    translate: var(--to-x, 0px) var(--to-y, 0px);
+    rotate: 24deg;
+    scale: 0.1;
+    opacity: 0.4;
+  }
+}
+
+.media-skin.arcade .am-ticket-brand {
+  margin: 0;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--ticket-ink-soft);
+}
+
+.media-skin.arcade .am-ticket-rank {
+  margin: 0;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--ticket-paper);
+  background: var(--ticket-ink);
+}
+
+.media-skin.arcade .am-ticket-count {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+  font-size: 40px;
+  line-height: 1;
+  color: var(--ticket-ink);
+  text-shadow: 4px 4px 0 rgb(163 36 26 / 0.22);
+}
+
+.media-skin.arcade .am-ticket-unit {
+  font-size: 12px;
+  letter-spacing: 0.2em;
+}
+
+.media-skin.arcade .am-ticket-meta {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  margin: 0;
+  padding-top: 10px;
+  border-top: 2px solid rgb(163 36 26 / 0.35);
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.media-skin.arcade .am-ticket-meta > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.media-skin.arcade .am-ticket-meta dt {
+  color: var(--ticket-ink-soft);
+}
+
+.media-skin.arcade .am-ticket-meta dd {
+  margin: 0;
+}
+
+.media-skin.arcade .am-ticket-barcode {
+  display: block;
+  width: 100%;
+  height: 24px;
+  background: repeating-linear-gradient(
+    to right,
+    #3a1410 0 2px,
+    transparent 2px 4px,
+    #3a1410 4px 6px,
+    transparent 6px 10px,
+    #3a1410 10px 14px,
+    transparent 14px 16px
+  );
+}
+
+.media-skin.arcade .am-ticket-serial {
+  margin: 0;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  color: var(--ticket-ink-soft);
+}
+
+.media-skin.arcade .am-tear-actions {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+
+.media-skin.arcade .am-ticket-hint {
+  margin: 0;
+  font-size: 8px;
+  color: var(--arc-muted);
+}
+
+.media-skin.arcade .am-btn-tear {
+  min-height: 44px;
+  font-size: 10px;
+  background: #34304a;
+  color: var(--arc-text);
+}
+
+.media-skin.arcade .am-after-tear {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 18px;
+  pointer-events: none;
+}
+
+.media-skin.arcade .am-after-tear > * {
+  pointer-events: auto;
+}
+
+.media-skin.arcade .am-banked {
+  margin: 0;
+  font-size: clamp(11px, 2.6cqi, 16px);
+  color: var(--arc-yellow);
+  text-shadow: 2px 2px 0 var(--arc-red);
+}
+
+.media-skin.arcade .am-btn-play {
+  min-height: 56px;
+  padding: 0 28px;
+  font-size: clamp(12px, 2.4cqi, 16px);
+  background: var(--arc-red);
+}
+
+/* The ticket bank: a running total of every ticket won, in the corner of the ticket screen and on the start screen. */
+.media-skin.arcade .am-bank {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 6px 10px;
+  font-size: 10px;
+  color: var(--arc-text);
+  background: #1a1824;
+  box-shadow: 0 0 0 3px #2a2638, 3px 3px 0 3px #000;
+}
+
+.media-skin.arcade .am-bank > span:last-child,
+.media-skin.arcade .am-bank-line > span:last-child {
+  color: var(--arc-yellow);
+}
+
+.media-skin.arcade .am-bank-label {
+  color: var(--arc-muted);
+}
+
+.media-skin.arcade .am-bank[data-bump] {
+  animation: arcade-bank-bump 420ms steps(4, end);
+}
+
+@keyframes arcade-bank-bump {
+  50% {
+    scale: 1.25;
+  }
+}
+
+.media-skin.arcade .am-bank-icon {
+  display: inline-block;
+  width: 16px;
+  height: 11px;
+  background: #ffe6b8;
+  -webkit-mask:
+    linear-gradient(#000 0 0) center / calc(100% - 4px) 100% no-repeat,
+    repeating-linear-gradient(to bottom, #000 0 3px, transparent 3px 4px) left / 2px 100% no-repeat,
+    repeating-linear-gradient(to bottom, #000 0 3px, transparent 3px 4px) right / 2px 100% no-repeat;
+  mask:
+    linear-gradient(#000 0 0) center / calc(100% - 4px) 100% no-repeat,
+    repeating-linear-gradient(to bottom, #000 0 3px, transparent 3px 4px) left / 2px 100% no-repeat,
+    repeating-linear-gradient(to bottom, #000 0 3px, transparent 3px 4px) right / 2px 100% no-repeat;
+  box-shadow: inset 0 -3px 0 #a3241a;
+}
+
+.media-skin.arcade .am-bank-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 9px;
+  color: var(--arc-muted);
+}
+
+/* Shorter screens: drop the fine print so the ticket and its button fit. */
+@container arcade-screen (height < 520px) {
+  .media-skin.arcade .am-ticket-stage {
+    --ticket-w: 220px;
+  }
+  .media-skin.arcade .am-ticket-serial {
+    display: none;
+  }
+  .media-skin.arcade .am-ticket-count {
+    font-size: 34px;
+  }
+}
+
+@container arcade-screen (height < 440px) {
+  .media-skin.arcade .am-ticket-stage {
+    --ticket-w: 200px;
+  }
+  .media-skin.arcade .am-ticket-barcode {
+    display: none;
+  }
+  .media-skin.arcade .am-ticket-body {
+    padding: 14px 18px 12px;
+    gap: 8px;
+  }
+  .media-skin.arcade .am-ticket-meta {
+    font-size: 8px;
+  }
+}
+
+@container arcade-screen (height < 300px) {
+  .media-skin.arcade .am-ticket-stage {
+    --ticket-w: 132px;
+    gap: 6px;
+  }
+  .media-skin.arcade .am-printer {
+    height: 18px;
+    width: calc(var(--ticket-w) + 28px);
+  }
+  .media-skin.arcade .am-printer::before,
+  .media-skin.arcade .am-printer::after {
+    top: 5px;
+    width: 4px;
+    height: 4px;
+  }
+  .media-skin.arcade .am-ticket-rank {
+    padding: 3px 6px;
+    font-size: 7px;
+    white-space: nowrap;
+  }
+  .media-skin.arcade .am-ticket-unit {
+    font-size: 7px;
+  }
+  .media-skin.arcade .am-btn-tear {
+    min-height: 36px;
+    font-size: 8px;
+  }
+  .media-skin.arcade .am-btn-play {
+    min-height: 44px;
+  }
+  .media-skin.arcade .am-ticket-stub {
+    height: 18px;
+  }
+  .media-skin.arcade .am-ticket-body {
+    padding: 12px 14px 9px;
+    gap: 5px;
+  }
+  .media-skin.arcade .am-ticket-meta,
+  .media-skin.arcade .am-ticket-brand,
+  .media-skin.arcade .am-ticket-hint {
+    display: none;
+  }
+  .media-skin.arcade .am-ticket-count {
+    font-size: 16px;
+    gap: 2px;
+  }
+  .media-skin.arcade .am-bank {
+    top: 6px;
+    right: 6px;
+    padding: 4px 6px;
+    font-size: 8px;
+  }
+  .media-skin.arcade .am-bank-label {
+    display: none;
+  }
+  .media-skin.arcade .am-btn-tear {
+    min-height: 40px;
+    padding: 0 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .media-skin.arcade .am-ticket[data-feeding],
+  .media-skin.arcade .am-ticket-body[data-flying],
+  .media-skin.arcade .am-bank[data-bump] {
+    animation: none;
+  }
+}
+
+/* GAME OVER: the countdown ran out. Everything else clears and the words take the whole screen. */
+.media-skin.arcade .arcade-machine[data-game-over][data-step="results"] .am-clear > :not(.am-results),
+.media-skin.arcade .arcade-machine[data-game-over][data-step="results"] .am-results > :not(.am-continue) {
+  display: none;
+}
+
+.media-skin.arcade .arcade-machine[data-game-over][data-step="results"] .am-continue {
+  font-size: clamp(26px, 8cqi, 64px);
+  line-height: 1.2;
+  letter-spacing: 0.06em;
+  color: var(--arc-red);
+  text-shadow: 4px 4px 0 #000, 0 0 0 transparent;
+  -webkit-text-stroke: 0;
+  animation: arcade-game-over 1600ms steps(1, end) both;
+}
+
+@keyframes arcade-game-over {
+  0% {
+    opacity: 0;
+  }
+  10%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .media-skin.arcade .arcade-machine[data-game-over][data-step="results"] .am-continue {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------ fullscreen: the video takes the whole screen */
+
+.media-skin.arcade:fullscreen > :is(video, mux-video, hls-video, hlsjs-video, native-hls-video, dash-video, shaka-video) {
+  flex: 1 1 auto;
+}
+
+/* The deck floats over the bottom of the picture and tucks away until the pointer comes near it. */
+.media-skin.arcade:fullscreen .arcade-deck-host {
+  position: absolute !important;
+  inset: auto 0 0 0 !important;
+  translate: 0 calc(100% + 8px);
+  transition: translate 220ms ease-out;
+  box-shadow: 0 -10px 30px rgb(0 0 0 / 0.5);
+}
+
+.media-skin.arcade:fullscreen:is([data-deck-peek], :has(.arcade-deck-host :focus-visible)) .arcade-deck-host {
+  translate: 0 0;
+}
+
+/* Touch screens: a tap shows the controls (Video.js tracks that), so the deck follows it. */
+@media (pointer: coarse) {
+  .media-skin.arcade:fullscreen[data-controls-visible] .arcade-deck-host {
+    translate: 0 0;
+  }
+}
+
+/* While the deck is down, the score strip and pop-ups use the full height. */
+.media-skin.arcade:fullscreen .arcade-screen-layer {
+  top: 0 !important;
+  bottom: 0 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .media-skin.arcade:fullscreen .arcade-deck-host {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------------ fullscreen: the ticket takes centre stage */
+
+.media-skin.arcade:fullscreen .am-ticket-stage {
+  --ticket-w: clamp(300px, 56cqh, 640px);
+  gap: clamp(16px, 2.4cqh, 30px);
+}
+
+.media-skin.arcade:fullscreen .am-printer {
+  height: 36px;
+  width: calc(var(--ticket-w) + 88px);
+}
+
+.media-skin.arcade:fullscreen .am-printer::before,
+.media-skin.arcade:fullscreen .am-printer::after {
+  top: 12px;
+  width: 9px;
+  height: 9px;
+}
+
+.media-skin.arcade:fullscreen .am-printer-mouth {
+  height: 8px;
+  bottom: -6px;
+}
+
+.media-skin.arcade:fullscreen .am-ticket-window {
+  margin-top: -20px;
+}
+
+.media-skin.arcade:fullscreen .am-ticket-stub {
+  height: clamp(40px, 5cqh, 58px);
+}
+
+.media-skin.arcade:fullscreen .am-ticket-body {
+  gap: clamp(12px, 1.6cqh, 20px);
+  padding: clamp(26px, 3.2cqh, 40px) clamp(30px, 4cqh, 48px) clamp(20px, 2.4cqh, 30px);
+}
+
+.media-skin.arcade:fullscreen .am-ticket-brand {
+  font-size: clamp(12px, 1.4cqh, 17px);
+}
+
+.media-skin.arcade:fullscreen .am-ticket-rank {
+  padding: 8px 14px;
+  font-size: clamp(16px, 2.1cqh, 26px);
+}
+
+.media-skin.arcade:fullscreen .am-ticket-count {
+  gap: 10px;
+  font-size: clamp(48px, 10cqh, 112px);
+  text-shadow: 6px 6px 0 rgb(163 36 26 / 0.22);
+}
+
+.media-skin.arcade:fullscreen .am-ticket-unit {
+  font-size: clamp(16px, 2cqh, 26px);
+}
+
+.media-skin.arcade:fullscreen .am-ticket-meta {
+  gap: 8px;
+  padding-top: 14px;
+  font-size: clamp(12px, 1.5cqh, 18px);
+}
+
+.media-skin.arcade:fullscreen .am-ticket-barcode {
+  height: clamp(34px, 4.4cqh, 52px);
+}
+
+.media-skin.arcade:fullscreen .am-ticket-serial {
+  font-size: clamp(10px, 1.2cqh, 14px);
+}
+
+.media-skin.arcade:fullscreen .am-ticket-hint {
+  font-size: clamp(11px, 1.4cqh, 17px);
+}
+
+.media-skin.arcade:fullscreen .am-btn-tear {
+  min-height: clamp(56px, 6.4cqh, 80px);
+  padding: 0 clamp(28px, 3.6cqh, 48px);
+  font-size: clamp(13px, 1.7cqh, 20px);
+}
+
+.media-skin.arcade:fullscreen .am-bank {
+  top: 18px;
+  right: 22px;
+  padding: 10px 14px;
+  font-size: clamp(14px, 1.6cqh, 20px);
+}
+
+.media-skin.arcade:fullscreen .am-bank-icon {
+  width: 22px;
+  height: 15px;
+}
+
+.media-skin.arcade:fullscreen .am-banked {
+  font-size: clamp(16px, 3cqi, 28px);
+}
+
+.media-skin.arcade:fullscreen .am-btn-play {
+  min-height: 68px;
+  padding: 0 40px;
+  font-size: clamp(14px, 2.2cqi, 22px);
+}

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Midnight Arcade · a Video.js v10 skin</title>
+    <meta name="description" content="Midnight Arcade: a Video.js v10 player skin built like a late-night arcade cabinet. Watch to score, finish to clear the stage, and put your initials on the high-score table." />
+    <meta name="theme-color" content="#0c0b10" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://arcade-video-player.vercel.app/" />
+    <meta property="og:title" content="Midnight Arcade · a Video.js v10 skin" />
+    <meta property="og:description" content="A video player built like a late-night arcade cabinet. Watch to score, finish to clear the stage, and tear off your prize ticket." />
+    <meta property="og:image" content="https://arcade-video-player.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The Midnight Arcade player: a pixel arcade cabinet printing a prize ticket that reads 35 tickets." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16' fill='%230c0b10'/%3E%3Crect x='3' y='3' width='10' height='10' fill='%23ffd23f'/%3E%3Crect x='6' y='5' width='4' height='6' fill='%23b9840f'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <a class="skip-link" href="#player">Skip to the player</a>
+    <header class="site-header">
+      <p class="eyebrow">A Video.js v10 skin</p>
+      <h1>Midnight Arcade</h1>
+      <p class="lede">Every video is a stage. Watch to score, finish to clear it, and put your initials on the cabinet's high-score table.</p>
+    </header>
+    <main class="stage-floor">
+      <div class="player-slot" id="player"></div>
+      <div class="cabinet-notch-wrap">
+        <div class="cabinet-notch" role="group" aria-label="Cabinet color" data-cabinet-current="midnight">
+          <button type="button" data-cabinet="midnight" aria-pressed="true"><span class="swatch swatch-midnight" aria-hidden="true"></span>Midnight</button>
+          <button type="button" data-cabinet="sunset" aria-pressed="false"><span class="swatch swatch-sunset" aria-hidden="true"></span>Sunset</button>
+          <button type="button" data-cabinet="beige" aria-pressed="false"><span class="swatch swatch-beige" aria-hidden="true"></span>Beige 80s</button>
+        </div>
+      </div>
+      <section class="how-to" aria-labelledby="how-to-title">
+        <h2 id="how-to-title">How to play</h2>
+        <p class="how-step">Drag the coin into the slot to start <span class="how-alt">(or click it)</span></p>
+        <ul class="keys">
+          <li><kbd>Space</kbd> Play / pause</li>
+          <li><kbd>←</kbd><kbd>→</kbd> Skip 10s</li>
+          <li><kbd>↑</kbd><kbd>↓</kbd> Volume</li>
+          <li><kbd>M</kbd> Sound</li>
+          <li><kbd>C</kbd> Subtitles</li>
+          <li><kbd>F</kbd> Big mode</li>
+        </ul>
+        <ul class="rules">
+          <li><b>100</b> points a second, times your combo (up to <b>x4</b>)</li>
+          <li>Pause or skip and the combo breaks</li>
+          <li>Reach the end without skipping: <b>+2,000</b></li>
+          <li><b>Continue</b> replays and keeps your score</li>
+        </ul>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <p>Built on <a href="https://videojs.org">Video.js v10</a> for the Video.js Skins Design Challenge. Ticket tear sound from <a href="https://www.zapsplat.com">zapsplat.com</a>. <span data-workbench-link><a href="./workbench.html">Open the skin workbench</a>.</span></p>
+    </footer>
+    <script type="module" src="/src/showcase/main.ts"></script>
+  </body>
+</html>
