@@ -12,7 +12,7 @@ import demoMedia from '@demo-media';
  * Mux instant clipping (asset_start_time / asset_end_time) serves the first 35 seconds,
  * long enough to reach the 2,500-point coin burst before Stage Clear.
  */
-const MUX_PLAYBACK_ID = 'EIhBhFYpuoeo00D4GWyIE1UA7Q013r1TubCVMztuXV00yc';
+const MUX_PLAYBACK_ID = 'g32WP02z4hFx78g02gBGZQ6X00QJsxRxw1uT01h4Ild87j8';
 const CLIP = { start: 0, end: 35 };
 const SRC = `https://stream.mux.com/${MUX_PLAYBACK_ID}.m3u8?asset_start_time=${CLIP.start}&asset_end_time=${CLIP.end}`;
 const POSTER = `https://image.mux.com/${MUX_PLAYBACK_ID}/thumbnail.webp?time=8`;
